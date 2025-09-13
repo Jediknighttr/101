@@ -1,5 +1,5 @@
 (function(){
-  const socket = io();
+  const socket = io(window.location.origin, { transports: ["websocket"] });
 
   let myId = null;
   let mySeat = null;
