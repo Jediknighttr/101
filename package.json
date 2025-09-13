@@ -1,0 +1,14 @@
+{
+  "name": "okey101-web",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Browser-based Okey 101 test app (real rules distribution, indicator/okey, bots).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
