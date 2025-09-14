@@ -8,6 +8,8 @@
 </head>
 <body>
   <div id="app">
+    <div id="errorBanner" class="banner hidden"></div>
+
     <header>
       <h1>Okey 101 (Web Test)</h1>
       <div id="roomInfo"></div>
@@ -17,11 +19,11 @@
       <label>Adın:</label>
       <input id="nameInput" placeholder="Adın" />
       <button id="joinBtn">Masaya Katıl</button>
-      <p class="hint">Bu linki arkadaşlarına gönder: <code id="linkOut"></code></p>
+      <p class="hint">Bu linki gönder: <code id="linkOut"></code></p>
     </section>
 
     <section id="hostPanel" class="card hidden">
-      <h3>Masa Ayarları (Sadece ilk giren değiştirir)</h3>
+      <h3>Masa Ayarları (Sadece ilk giren)</h3>
       <div class="row">
         <label>Oyun Modu</label>
         <select id="modeSelect">
@@ -88,9 +90,8 @@
     </section>
   </div>
 
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
-          integrity="sha384-Bi9mYrHu3lADu7bCijc0qZ1bPjP4mAmJw/7v8YHk1K9b3d2JFa2S7j7c3oPpoc7m"
-          crossorigin="anonymous"></script>
+  <!-- Socket.IO istemciyi sunucudan yükle -->
+  <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
 </body>
 </html>
