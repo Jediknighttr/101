@@ -1,6 +1,21 @@
 (function () {
-  // Render'da doğru hosta bağlan ve doğrudan WebSocket kullan
+  // Sunucu ile bağlan (aynı origin) ve WS kullan
   const socket = io(window.location.origin, { transports: ["websocket"] });
+
+  // Görsel hata bandını kullan
+  const errEl = document.getElementById("errorBanner");
+  function showError(msg) {
+    if (!errEl) return;
+    errEl.textContent = msg;
+    errEl.classList.remove("hidden");
+    console.error("[UI ERROR]", msg);
+  }
+  function hideError() {
+    if (!errEl) return;
+    errEl.classList.add("hidden");
+  }
+
+  console.log("client.js yüklendi");
 
   let myId = null;
   let mySeat = null;
@@ -52,9 +67,7 @@
     const star = t.okey ? '<div class="star">★</div>' : "";
     return `<div class="${cls}" data-id="${t.id}" title="${t.renk} ${
       t.sayi === 0 ? "Sahte" : t.sayi
-    }">
-      ${t.sayi === 0 ? "•" : t.sayi}${star}
-    </div>`;
+    }">${t.sayi === 0 ? "•" : t.sayi}${star}</div>`;
   }
   function showHand() {
     handArea.innerHTML = myHand.map(tileHtml).join("");
@@ -115,19 +128,28 @@
     discardBtn.disabled = !myTurn || !selectedTileId;
   }
 
-  // --- Socket olayları ---
+  // --- Socket olayları + hata bandı ---
   socket.on("connect", () => {
-    // Link bilgisini göster
+    hideError();
+    console.log("socket CONNECTED:", socket.id);
     if (linkOut) linkOut.textContent = window.location.href;
   });
-
   socket.on("connect_error", (err) => {
-    console.error("Socket connect_error:", err);
-    // Katıl butonunu devre dışı bırakma; kullanıcı yeniden denesin
+    showError("Sunucuya bağlanılamadı. (connect_error) — Lütfen sayfayı yenileyin.");
+    console.error("socket connect_error:", err);
+  });
+  socket.io.on("reconnect_attempt", () => {
+    showError("Bağlantı yeniden deneniyor…");
+  });
+  socket.io.on("reconnect", () => {
+    hideError();
+  });
+  socket.on("disconnect", (reason) => {
+    showError("Bağlantı koptu: " + reason);
+    console.warn("socket DISCONNECTED:", reason);
   });
 
   socket.on("hello", ({ roomId, summary }) => {
-    if (linkOut) linkOut.textContent = window.location.href;
     if (roomInfo) roomInfo.textContent = `Masa: ${roomId}`;
     updateState(summary);
   });
@@ -149,7 +171,10 @@
     chatLog.scrollTop = chatLog.scrollHeight;
   });
 
-  socket.on("errorMsg", (m) => alert(m));
+  socket.on("errorMsg", (m) => {
+    showError(m);
+    alert(m);
+  });
 
   // --- Durumu ekrana uygula ---
   function updateState(summary) {
@@ -173,14 +198,13 @@
 
     if (room.turn && mySeat && room.turn === mySeat) restartTimer();
 
-    // Sunucudan kendi elimi güncelle
     socket.emit("requestHand");
-
     syncActionButtons();
   }
 
   // --- UI event'leri ---
   joinBtn.addEventListener("click", () => {
+    console.log("Join clicked");
     const name = nameInput.value.trim() || "Oyuncu";
     socket.emit("join", { name });
   });
