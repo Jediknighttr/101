@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Okey 101 (Web Test)</title>
+  <title>Okey 101 (Web)</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,7 +11,7 @@
     <div id="errorBanner" class="banner hidden"></div>
 
     <header>
-      <h1>Okey 101 (Web Test)</h1>
+      <h1>Okey 101 (Web)</h1>
       <div id="roomInfo"></div>
     </header>
 
@@ -23,7 +23,7 @@
     </section>
 
     <section id="hostPanel" class="card hidden">
-      <h3>Masa Ayarları (Sadece ilk giren)</h3>
+      <h3>Masa Ayarları (Sadece host)</h3>
       <div class="row">
         <label>Oyun Modu</label>
         <select id="modeSelect">
@@ -42,8 +42,12 @@
         <label>Hamle Süresi (sn)</label>
         <input id="turnSeconds" type="number" value="30" min="10" max="90" />
       </div>
-      <button id="applySettings">Ayarları Uygula</button>
-      <button id="fillStart">Eksikleri Botla Doldur & Başlat</button>
+      <div class="row">
+        <button id="applySettings">Ayarları Uygula</button>
+        <button id="fillStart">Eksikleri Botla Doldur & Başlat</button>
+        <button id="restartBtn" class="warn hidden">Oyunu Yeniden Başlat</button>
+      </div>
+      <p id="restartHint" class="hint hidden">Yeni bir canlı oyuncu katıldığı için host bu butonla masayı sıfırlayıp yeniden dağıtabilir.</p>
     </section>
 
     <section id="tablePanel" class="card hidden">
@@ -90,7 +94,6 @@
     </section>
   </div>
 
-  <!-- Socket.IO istemciyi sunucudan yükle -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
 </body>
