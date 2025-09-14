@@ -5,24 +5,15 @@
   --accent: #ffd166;
 }
 * { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--bg); color: var(--text);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-}
+body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
 header { padding: 16px 20px; display:flex; align-items:center; justify-content:space-between; }
 h1 { margin: 0; font-size: 20px; }
-.card {
-  background: var(--card); border-radius: 12px; padding: 16px; margin: 12px 20px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-}
+.card { background: var(--card); border-radius: 12px; padding: 16px; margin: 12px 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
 .hidden { display:none; }
 .row { display:flex; gap:12px; align-items:center; margin:8px 0; }
 label { width: 150px; opacity: 0.9; }
-input, select, button {
-  background: #3b3f46; color: var(--text); border: 1px solid #555; border-radius: 10px; padding: 8px 12px;
-}
-button { cursor:pointer; }
-button:hover { filter: brightness(1.1); }
+input, select, button { background: #3b3f46; color: var(--text); border: 1px solid #555; border-radius: 10px; padding: 8px 12px; }
+button { cursor:pointer; } button:hover { filter: brightness(1.1); }
 .hint { opacity: 0.7; }
 code { background:#111; padding:2px 6px; border-radius:6px; }
 
@@ -35,38 +26,20 @@ code { background:#111; padding:2px 6px; border-radius:6px; }
 .board { display:flex; gap:32px; align-items:center; justify-content:center; padding: 10px 20px; }
 .pile, .discard { display:flex; flex-direction:column; align-items:center; gap:8px; }
 
-.tile {
-  width: 60px; height: 80px;
-  background: #f8f1dc;
-  border: 2px solid #c9bca4;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-  display:flex; align-items:center; justify-content:center;
-  font-size: 28px; font-weight: 800; color: #d12a2a; position: relative;
-  user-select:none;
-}
+.tile { width: 60px; height: 80px; background: #f8f1dc; border: 2px solid #c9bca4; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; font-size: 28px; font-weight: 800; color: #d12a2a; position: relative; user-select:none; }
 .tile.small { width: 48px; height: 64px; font-size: 22px; }
 .back { background: #e9ddc4; border-color: #c0b399; }
-.tile .star {
-  position: absolute; top: 6px; right: 6px; font-size: 16px; color: #f1c40f;
-  filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
-}
-.kirmizi { color: #d32f2f; }
-.siyah { color: #1f1f1f; }
-.mavi { color: #1565c0; }
-.yesil { color: #2e7d32; }
-.sahte { color: #555; }
+.tile .star { position: absolute; top: 6px; right: 6px; font-size: 16px; color: #f1c40f; filter: drop-shadow(0 0 2px rgba(0,0,0,0.4)); }
+.kirmizi { color: #d32f2f; } .siyah { color: #1f1f1f; } .mavi { color: #1565c0; } .yesil { color: #2e7d32; } .sahte { color: #555; }
 
 .hand h3 { margin-top: 0; }
 #handArea { display:flex; flex-wrap:wrap; gap:8px; }
+
 .tile.selectable { outline: 2px dashed transparent; }
 .tile.selectable:hover { outline-color: var(--accent); }
 .tile.selected { outline-color: var(--accent); outline-width: 3px; }
 
-.timer {
-  margin-top: 8px; width: 60px; height: 60px; border-radius: 50%;
-  display:flex; align-items:center; justify-content:center;
-  background:#222; border:2px solid #444; font-size: 20px;
-}
+.timer { margin-top: 8px; width: 60px; height: 60px; border-radius: 50%; display:flex; align-items:center; justify-content:center; background:#222; border:2px solid #444; font-size: 20px; }
 
-#discardTop { background:#f8f1dc; }
+/* Hata bandı */
+.banner { position: sticky; top: 0; left: 0; right: 0; background: #c62828; color: #fff; padding: 10px 14px; z-index: 10; font-weight: 600; }
