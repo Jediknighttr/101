@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Okey 101 (Web)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="rotateHint" class="rotate-hint hidden">
+    En iyi deneyim için telefonu <b>yana çevir</b> veya <b>Tam Ekran</b> tuşuna bas.
+  </div>
+
+  <div id="app">
+    <div id="errorBanner" class="banner hidden"></div>
+
+    <header>
+      <div class="title">
+        <h1>Okey 101 (Web)</h1>
+        <div id="roomInfo"></div>
+      </div>
+
+      <div class="controls">
+        <button id="fsBtn" title="Tam ekran">⛶ Tam Ekran</button>
+        <button id="exitFsBtn" class="hidden" title="Tam ekrandan çık">⤢ Çık</button>
+      </div>
+    </header>
+
+    <section id="joinPanel" class="card">
+      <label>Adın:</label>
+      <input id="nameInput" placeholder="Adın" />
+      <button id="joinBtn">Masaya Katıl</button>
+      <p class="hint">Bu linki gönder: <code id="linkOut"></code></p>
+    </section>
+
+    <section id="hostPanel" class="card hidden">
+      <h3>Masa Ayarları (Sadece host)</h3>
+      <div class="row">
+        <label>Oyun Modu</label>
+        <select id="modeSelect">
+          <option value="tekli">Tekli</option>
+          <option value="esli">Eşli</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Bot Zorluğu</label>
+        <select id="botSelect">
+          <option value="kolay">Kolay</option>
+          <option value="zor">Zor</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Hamle Süresi (sn)</label>
+        <input id="turnSeconds" type="number" value="30" min="10" max="90" />
+      </div>
+      <div class="row">
+        <button id="applySettings">Ayarları Uygula</button>
+        <button id="fillStart">Eksikleri Botla Doldur & Başlat</button>
+        <button id="restartBtn" class="warn hidden">Oyunu Yeniden Başlat</button>
+      </div>
+      <p id="restartHint" class="hint hidden">Yeni bir canlı oyuncu katıldığı için host bu butonla masayı sıfırlayıp yeniden dağıtabilir.</p>
+    </section>
+
+    <section id="tablePanel" class="card hidden">
+      <div class="topRow">
+        <div class="status">
+          <div>Gösterge: <span id="gostergeOut">-</span></div>
+          <div>OKEY: <span id="okeyOut">-</span></div>
+          <div>Sıra: <span id="turnOut">-</span></div>
+          <div>Atılan Üst: <span id="discardOut">-</span></div>
+        </div>
+        <div class="chat">
+          <div id="chatLog"></div>
+          <div class="chatBtns">
+            <button class="preset">Selamlar 👋</button>
+            <button class="preset">Kolay gelsin 🍀</button>
+            <button class="preset">Bol şanslar 🎲</button>
+            <button class="preset">Elin nasıl?</button>
+            <button class="preset">Hadi seri olalım ⏳</button>
+            <button class="preset">Tebrikler 👏</button>
+            <button class="preset">Teşekkür ederim 🙏</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="board">
+        <div class="pile">
+          <div class="tile back" title="Desteden çek"></div>
+          <button id="drawDeck">Desteden Çek</button>
+        </div>
+        <div class="discard">
+          <div id="discardTop" class="tile"></div>
+          <button id="drawDiscard">Atılandan Al</button>
+        </div>
+      </div>
+
+      <div class="hand card">
+        <h3>Elin</h3>
+        <div id="handArea"></div>
+        <div class="actions">
+          <button id="discardBtn">Seçili Taşı At</button>
+        </div>
+        <div class="timer" id="timer">30</div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+  <script>
+    // Tam ekran / yön ipuçları (kısa)
+    (function(){
+      const fsBtn = document.getElementById('fsBtn');
+      const exitFsBtn = document.getElementById('exitFsBtn');
+      const rotateHint = document.getElementById('rotateHint');
+      async function enterFS(){ try{ if(!document.fullscreenElement) await document.documentElement.requestFullscreen(); if(screen.orientation?.lock) try{await screen.orientation.lock('landscape')}catch{} }catch(e){ alert('Tam ekran açılamadı: '+(e?.message||e)); } }
+      async function exitFS(){ try{ if(document.fullscreenElement) await document.exitFullscreen(); screen.orientation?.unlock?.(); }catch{} }
+      fsBtn.onclick=enterFS; exitFsBtn.onclick=exitFS;
+      document.addEventListener('fullscreenchange', ()=>{ const on=!!document.fullscreenElement; fsBtn.classList.toggle('hidden', on); exitFsBtn.classList.toggle('hidden', !on); });
+      function updateHint(){ const isPortrait=window.matchMedia('(orientation: portrait)').matches; const tableVisible=!document.getElementById('tablePanel').classList.contains('hidden'); rotateHint.classList.toggle('hidden', !(isPortrait&&tableVisible)); }
+      window.addEventListener('orientationchange', updateHint); window.addEventListener('resize', updateHint); setInterval(updateHint, 1000);
+      const linkOut = document.getElementById('linkOut'); if (linkOut) linkOut.textContent = window.location.href;
+    })();
+  </script>
+</body>
+</html>
