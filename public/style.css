@@ -1,27 +1,35 @@
 :root { --bg:#1e2124; --card:#2b2f36; --text:#f2f2f2; --accent:#ffd166; }
 *{ box-sizing:border-box }
-body{ margin:0; background:var(--bg); color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial }
-header{ padding:16px 20px; display:flex; align-items:center; justify-content:space-between }
-h1{ margin:0; font-size:20px }
-.card{ background:var(--card); border-radius:12px; padding:16px; margin:12px 20px; box-shadow:0 6px 24px rgba(0,0,0,.25) }
-.hidden{ display:none }
+html, body { height: 100%; }
+body{ margin:0; background:var(--bg); color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial; min-height:100dvh; }
+#app { min-height: 100dvh; padding-bottom: env(safe-area-inset-bottom); }
+
+header{ padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.title h1{ margin:0; font-size:20px }
+.title #roomInfo { font-size:12px; opacity:.8 }
+.controls { display:flex; gap:8px; }
+.controls button { background:#3b3f46; color:var(--text); border:1px solid #555; border-radius:10px; padding:8px 12px; cursor:pointer; }
+.controls button:hover{ filter:brightness(1.1) }
+
+.card{ background:var(--card); border-radius:12px; padding:16px; margin:12px 16px; box-shadow:0 6px 24px rgba(0,0,0,.25) }
+.hidden{ display:none !important }
 .row{ display:flex; gap:12px; align-items:center; margin:8px 0 }
 label{ width:150px; opacity:.9 }
 input,select,button{ background:#3b3f46; color:var(--text); border:1px solid #555; border-radius:10px; padding:8px 12px }
 button{ cursor:pointer } button:hover{ filter:brightness(1.1) }
-button.warn{ background:#8d2b2b; border-color:#b33 } 
+button.warn{ background:#8d2b2b; border-color:#b33 }
 .hint{ opacity:.7 } code{ background:#111; padding:2px 6px; border-radius:6px }
 
 .topRow{ display:flex; gap:16px }
-.status{ flex:1; display:grid; grid-template-columns:repeat(2,minmax(150px,1fr)); gap:8px }
+.status{ flex:1; display:grid; grid-template-columns:repeat(2,minmax(140px,1fr)); gap:8px }
 .chat{ flex:1; display:flex; flex-direction:column; gap:8px }
 #chatLog{ height:120px; overflow:auto; background:#222; border-radius:8px; padding:8px; border:1px solid #444 }
 .chatBtns{ display:flex; flex-wrap:wrap; gap:6px }
 
-.board{ display:flex; gap:32px; align-items:center; justify-content:center; padding:10px 20px }
+.board{ display:flex; gap:24px; align-items:center; justify-content:center; padding:10px 16px; flex-wrap:wrap }
 .pile,.discard{ display:flex; flex-direction:column; align-items:center; gap:8px }
 
-.tile{ width:60px; height:80px; background:#f8f1dc; border:2px solid #c9bca4; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; color:#d12a2a; position:relative; user-select:none }
+.tile{ width:60px; height:80px; background:#f8f1dc; border:2px solid #c9bca4; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; color:#d12a2a; position:relative; user-select:none; touch-action:manipulation }
 .tile.small{ width:48px; height:64px; font-size:22px }
 .back{ background:#e9ddc4; border-color:#c0b399 }
 .tile .star{ position:absolute; top:6px; right:6px; font-size:16px; color:#f1c40f; filter:drop-shadow(0 0 2px rgba(0,0,0,.4)) }
@@ -38,3 +46,27 @@ button.warn{ background:#8d2b2b; border-color:#b33 }
 
 /* Hata bandı */
 .banner{ position:sticky; top:0; left:0; right:0; background:#c62828; color:#fff; padding:10px 14px; z-index:10; font-weight:600 }
+
+/* Dikey (portrait) düzen: elemanları üst üste koy, taşları küçült */
+@media (orientation: portrait) {
+  .topRow { flex-direction: column; }
+  .status { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+  .tile { width:52px; height:70px; font-size:24px; }
+  .tile.small { width:42px; height:58px; font-size:20px; }
+  .chatBtns button { padding:6px 8px; }
+  .board { gap:16px; }
+}
+
+/* Yatay (landscape) düzen: geniş yerleşim */
+@media (orientation: landscape) {
+  #app { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+}
+
+/* Dikeyde üst uyarı */
+.rotate-hint {
+  position: fixed; inset: 0 auto auto 0;
+  width: 100%; text-align: center;
+  background: rgba(0,0,0,.65); color: #fff;
+  padding: 10px 12px; z-index: 50;
+  backdrop-filter: blur(2px);
+}
