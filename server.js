@@ -1,4 +1,4 @@
-// server.js (çalışan sade sürüm)
+// server.js (sağlam sürüm + health + SPA + Socket.IO)
 const path = require('path');
 const express = require('express');
 const http = require('http');
@@ -8,38 +8,38 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Statik dosyalar
+// statik dosyalar
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Sağlık kontrolü (opsiyonel ama faydalı)
+// sağlık kontrolü
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
-// ----------------- OYUN İSKELETİ -----------------
+// ---- OYUN İSKELETİ ----
 const COLORS = ['kirmizi','siyah','mavi','yesil'];
-const SEATS = ['S','W','N','E'];
+const SEATS  = ['S','W','N','E'];
 
 function createDeck(){
   const d=[];
   for(const c of COLORS){
     for(let n=1;n<=13;n++){
-      d.push({sayi:n,renk:c,id:`${c}-${n}-a`});
-      d.push({sayi:n,renk:c,id:`${c}-${n}-b`});
+      d.push({sayi:n, renk:c, id:`${c}-${n}-a`});
+      d.push({sayi:n, renk:c, id:`${c}-${n}-b`});
     }
   }
-  d.push({sayi:0,renk:'sahte',id:'sahte-a'});
-  d.push({sayi:0,renk:'sahte',id:'sahte-b'});
+  d.push({sayi:0, renk:'sahte', id:'sahte-a'});
+  d.push({sayi:0, renk:'sahte', id:'sahte-b'});
   return d;
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function nextSeat(s){ return SEATS[(SEATS.indexOf(s)+1)%SEATS.length]; }
-function okeyFromGosterge(g){ const next=g.sayi===13?1:g.sayi+1; return {sayi:next,renk:g.renk}; }
+function okeyFromGosterge(g){ const next = g.sayi===13 ? 1 : g.sayi+1; return {sayi:next, renk:g.renk}; }
 
 const rooms = {};
 function getRoom(id){
   if(!rooms[id]){
     rooms[id] = {
       id, hostId:null,
-      settings:{mode:'tekli',bot:'kolay',turnSeconds:30},
+      settings:{mode:'tekli', bot:'kolay', turnSeconds:30},
       seats:{S:null,W:null,N:null,E:null},
       players:{}, started:false,
       deck:[], discard:[], gosterge:null, okey:null,
@@ -60,13 +60,13 @@ function roomSummary(r){
 function handFor(socket,r){
   const pid=socket.data.playerId; const p=r.players[pid]; if(!p) return [];
   const seat=p.seat; const o=r.okey;
-  return (r.hands[seat]||[]).map(t=>({...t,okey:o&&t.sayi===o.sayi&&t.renk===o.renk}));
+  return (r.hands[seat]||[]).map(t=>({...t, okey:o && t.sayi===o.sayi && t.renk===o.renk}));
 }
 function fillBots(r){
   for(const s of SEATS){
     if(!r.seats[s]){
       const id=`bot-${s}-${Math.random().toString(36).slice(2,7)}`;
-      r.players[id]={id,name:(r.settings.bot==='zor'?`Bot(${s})🔥`:`Bot(${s})`),seat:s,isBot:true};
+      r.players[id]={id, name:(r.settings.bot==='zor'?`Bot(${s})🔥`:`Bot(${s})`), seat:s, isBot:true};
       r.seats[s]=id;
     }
   }
@@ -78,7 +78,7 @@ function startGame(r){
   r.okey = okeyFromGosterge(r.gosterge);
   r.turn = SEATS[Math.floor(Math.random()*SEATS.length)];
   for(const s of SEATS){
-    const c=(s===r.turn)?21:20;
+    const c = (s===r.turn)?21:20;
     r.hands[s]=[];
     for(let i=0;i<c;i++) r.hands[s].push(r.deck.pop());
   }
@@ -97,7 +97,6 @@ function discardTile(r,seat,tileId){
 function botChoose(r,seat){
   const h=r.hands[seat]; if(!h.length) return null;
   if(r.settings.bot==='kolay') return h[Math.floor(Math.random()*h.length)].id;
-  // basit "zor" sezgisi
   let bi=0, bs=999;
   for(let i=0;i<h.length;i++){
     const t=h[i];
@@ -120,20 +119,19 @@ function maybeBot(r){
   }, 900);
 }
 
-// SPA: tüm GET isteklerini index.html'e yönlendir (statikten sonra gelmeli)
+// SPA: bütün GET isteklerini index.html'e yönlendir (statikten sonra)
 app.get('*', (req,res)=> res.sendFile(path.join(__dirname,'public','index.html')));
 
-// ----------------- SOCKET.IO -----------------
+// ---- SOCKET.IO ----
 io.on('connection',(socket)=>{
-  // Güvenli roomId çözümü
+  // referer güvenli çözüm
   let roomId = 'masa-1';
   try {
     const ref = socket.handshake.headers.referer || '';
     const u = new URL(ref || 'http://example.com/?room=masa-1');
     roomId = u.searchParams.get('room') || 'masa-1';
-  } catch (e) {
-    roomId = 'masa-1';
-  }
+  } catch { roomId = 'masa-1'; }
+
   const room = getRoom(roomId);
   socket.join(roomId);
   socket.data.roomId = roomId;
@@ -160,18 +158,14 @@ io.on('connection',(socket)=>{
     io.to(roomId).emit('state', roomSummary(room));
   });
 
-  socket.on('startOrFill', ()=>{
-    if(room.started) return;
-    fillBots(room);
-    startIfReady(room);
-  });
+  socket.on('startOrFill', ()=>{ if(room.started) return; fillBots(room); startIfReady(room); });
 
   socket.on('draw', ({from})=>{
     const pid=socket.data.playerId; const p=room.players[pid];
     if(!(p && p.seat===room.turn && !p.isBot)) return;
     if(from==='deck') drawDeck(room,p.seat);
     else if(from==='discard' && room.discard.length) drawDiscard(room,p.seat);
-    io.to(roomId).emit('state', roomSummary(room));
+    io.to(room.id).emit('state', roomSummary(room));
   });
 
   socket.on('discard', ({tileId})=>{
@@ -179,11 +173,11 @@ io.on('connection',(socket)=>{
     if(!(p && p.seat===room.turn && !p.isBot)) return;
     if(!discardTile(room,p.seat,tileId)) return;
     room.turn = nextSeat(room.turn);
-    io.to(roomId).emit('state', roomSummary(room));
+    io.to(room.id).emit('state', roomSummary(room));
     maybeBot(room);
   });
 
-  socket.on('requestHand', ()=>{
+  socket.on('requestHand', ()=> {
     const r = rooms[socket.data.roomId];
     socket.emit('yourHand', r ? handFor(socket,r) : []);
   });
@@ -212,6 +206,4 @@ io.on('connection',(socket)=>{
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, ()=> {
-  console.log('Server listening on *:' + PORT);
-});
+server.listen(PORT, ()=> console.log('Server listening on *:' + PORT));
