@@ -2,17 +2,31 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Okey 101 (Web)</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Dikey kullanımda çıkan yönlendirme ipucu -->
+  <div id="rotateHint" class="rotate-hint hidden">
+    En iyi deneyim için telefonu <b>yana çevir</b> veya <b>Tam Ekran</b> tuşuna bas.
+  </div>
+
   <div id="app">
     <div id="errorBanner" class="banner hidden"></div>
 
     <header>
-      <h1>Okey 101 (Web)</h1>
-      <div id="roomInfo"></div>
+      <div class="title">
+        <h1>Okey 101 (Web)</h1>
+        <div id="roomInfo"></div>
+      </div>
+
+      <div class="controls">
+        <button id="fsBtn" title="Tam ekran">⛶ Tam Ekran</button>
+        <button id="exitFsBtn" class="hidden" title="Tam ekrandan çık">⤢ Çık</button>
+      </div>
     </header>
 
     <section id="joinPanel" class="card">
@@ -94,7 +108,66 @@
     </section>
   </div>
 
+  <!-- Socket.IO istemci kütüphanesi -->
   <script src="/socket.io/socket.io.js"></script>
+  <!-- Mevcut client kodun (biz değiştirmiyoruz) -->
   <script src="client.js"></script>
+
+  <!-- Sadece tam ekran + yönlendirme / mobil davranışı -->
+  <script>
+    (function(){
+      const fsBtn = document.getElementById('fsBtn');
+      const exitFsBtn = document.getElementById('exitFsBtn');
+      const rotateHint = document.getElementById('rotateHint');
+
+      async function enterFullscreen() {
+        const el = document.documentElement;
+        try {
+          if (!document.fullscreenElement) {
+            await el.requestFullscreen();
+          }
+          // Android Chrome'da çoğu cihaz destekler
+          if (screen.orientation && screen.orientation.lock) {
+            try { await screen.orientation.lock('landscape'); } catch(e) {}
+          }
+        } catch (e) {
+          alert('Tam ekran açılamadı: ' + (e && e.message ? e.message : e));
+        }
+      }
+      async function exitFullscreen() {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+        } catch(e){}
+        try {
+          if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+        } catch(e){}
+      }
+
+      fsBtn.addEventListener('click', enterFullscreen);
+      exitFsBtn.addEventListener('click', exitFullscreen);
+
+      document.addEventListener('fullscreenchange', () => {
+        const on = !!document.fullscreenElement;
+        fsBtn.classList.toggle('hidden', on);
+        exitFsBtn.classList.toggle('hidden', !on);
+      });
+
+      function updateRotateHint() {
+        const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+        // Masa görünürken portrede uyarı göster
+        const tableVisible = !document.getElementById('tablePanel').classList.contains('hidden');
+        if (isPortrait && tableVisible) rotateHint.classList.remove('hidden');
+        else rotateHint.classList.add('hidden');
+      }
+      window.addEventListener('orientationchange', updateRotateHint);
+      window.addEventListener('resize', updateRotateHint);
+      // client.js ilk state’i gönderdiğinde tekrar çağırılacak
+      setInterval(updateRotateHint, 1000); // basit güvence
+
+      // Link bilgisini yaz (client.js de yazıyor; burada da yedek)
+      const linkOut = document.getElementById('linkOut');
+      if (linkOut) linkOut.textContent = window.location.href;
+    })();
+  </script>
 </body>
 </html>
